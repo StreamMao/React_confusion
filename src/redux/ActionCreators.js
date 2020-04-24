@@ -1,5 +1,4 @@
 import * as ActionTypes from './ActionTypes';
-import { DISHES } from '../shared/dishes';
 import { baseUrl } from '../shared/baseUrl';
 
 export const addComment = (comment) => ({
@@ -45,6 +44,48 @@ export const postComment = (dishId, rating, author, comment) => (dispatch) => {
         alert('Your comment could not be posted\nError: '+ error.message); })
 }
 
+export const postFeedback = (firstname, lastname, telnum, email, agree, contactType, message) => {
+    const newFeedback = {
+        firstname: firstname,
+        lastname: lastname,
+        telnum: telnum,
+        email: email,
+        agree: agree,
+        contactType: contactType,
+        message: message
+    }
+    newFeedback.date = new Date().toISOString();
+
+    return fetch(baseUrl + 'feedback', {
+        method: 'POST',
+        body: JSON.stringify(newFeedback),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {  //handle response from server
+        if (response.ok) {
+            return response;
+        } else {
+            //There is a reponse of error from server
+            var error = new Error('Error ' + response.status + ': ' + response.statusText)
+            error.response = response;
+            throw error;
+        }
+    },
+    //Don't hear back anything from server
+    error => {
+        var errmess = new Error(error.message);
+        throw errmess;
+    })
+    .then(response =>  response.json())
+    .then(response => {console.log(response);
+            alert('Thank you for your feedback!\n' + response)})  //update comment that has been posted to the server side, into redux
+    .catch(error => { console.log('Post Feedback', error.message);
+            alert('Your feedback could not be posted\nError: '+ error.message); })
+}
+
 //Thunk Dishes
 export const fetchDishes = () => (dispatch) => {
     dispatch(dishesLoading(true));
@@ -66,7 +107,7 @@ export const fetchDishes = () => (dispatch) => {
         })
         .then(response => response.json())
         .then(dishes => dispatch(addDishes(dishes)))
-        .catch(error => dispatch(dishesFailed(error.message))); // this will catch both
+        .catch(error => dispatch(dishesFailed(error.message))); // this will catch both errors
 }
 
 //Actions
@@ -104,7 +145,7 @@ export const fetchComments = () =>(dispatch) => {
         })
         .then(response => response.json())
         .then(comments => dispatch(addComments(comments)))
-        .catch(error => dispatch(commentsFailed(error.message))); // this will catch both
+        .catch(error => dispatch(commentsFailed(error.message))); // this will catch both errors
 
         
 }
@@ -141,7 +182,7 @@ export const fetchPromos = () =>(dispatch) => {
         })
         .then(response => response.json())
         .then(promos => dispatch(addPromos(promos)))
-        .catch(error => dispatch(promosFailed(error.message))); // this will catch both
+        .catch(error => dispatch(promosFailed(error.message))); // this will catch both errors
 }
 
 //Actions
@@ -157,4 +198,45 @@ export const promosFailed = (errmess) => ({
 export const addPromos = (promos) =>({
     type: ActionTypes.ADD_PROMOS,
     payload: promos
+});
+
+
+//Thunk Leaders
+export const fetchLeaders = () =>(dispatch) => {
+    dispatch(leadersLoading(true));
+    
+    return fetch(baseUrl + 'leaders')
+        .then(response => {
+            if (response.ok) {
+                return response;
+            } else {
+                //There is a reponse of error from server
+                var error = new Error('Error ' + response.status + ': ' + response.statusText)
+                error.response = response;
+                throw error;
+            }
+        },
+        //Don't hear back anything from server
+        error => {
+            var errmess = new Error(error.message);
+            throw errmess;
+        })
+        .then(response => response.json())
+        .then(leaders => dispatch(addLeaders(leaders)))
+        .catch(error => dispatch(leadersFailed(error.message))); // this will catch both errors
+}
+
+//Actions
+export const leadersLoading = () => ({
+    type: ActionTypes.LEADERS_LOADING
+});
+
+export const leadersFailed = (errmess) => ({
+    type: ActionTypes.LEADERS_FAILED,
+    payload: errmess
+});
+
+export const addLeaders = (leaders) =>({
+    type: ActionTypes.ADD_LEADERS,
+    payload: leaders
 });

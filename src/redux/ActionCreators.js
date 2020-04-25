@@ -80,8 +80,7 @@ export const postFeedback = (firstname, lastname, telnum, email, agree, contactT
         throw errmess;
     })
     .then(response =>  response.json())
-    .then(response => {console.log(response);
-            alert('Thank you for your feedback!\n' + response)})  //update comment that has been posted to the server side, into redux
+    .then(response => alert('Thank you for your feedback!\n' + JSON.stringify(response)))  //update comment that has been posted to the server side, into redux
     .catch(error => { console.log('Post Feedback', error.message);
             alert('Your feedback could not be posted\nError: '+ error.message); })
 }
